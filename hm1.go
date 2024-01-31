@@ -9,8 +9,12 @@ import (
 	"math"
 	"strings"
 	"sync"
+
 	"golang.org/x/tour/tree"
 )
+
+// Краще було створювати новий go package для кожного завдання
+// В Go Tour є секція про go packages
 
 // Exercise: Loops and Functions
 
@@ -161,6 +165,9 @@ func (img Image) At(x, y int) color.Color {
 // Exercise: Equivalent Binary Trees
 
 func Walk(t *tree.Tree, ch chan int) {
+	// канали теж краще закривати по defer якщо є змога тому що він тоді закриється і в разі якшо відбудеться паника
+	defer close(ch)
+
 	var walk func(*tree.Tree)
 	walk = func(t *tree.Tree) {
 		if t == nil {
@@ -172,8 +179,6 @@ func Walk(t *tree.Tree, ch chan int) {
 	}
 
 	walk(t)
-
-	close(ch)
 }
 
 func Same(t1, t2 *tree.Tree) bool {
@@ -210,6 +215,8 @@ func Crawl(url string, depth int, fetcher Fetcher, routes chan string) {
 	visited := make(map[uint32]bool)
 	var mu sync.Mutex
 
+	defer close(routes)
+
 	var crawl func(url string, depth int, fetcher Fetcher)
 	crawl = func(url string, depth int, fetcher Fetcher) {
 		mu.Lock()
@@ -242,7 +249,6 @@ func Crawl(url string, depth int, fetcher Fetcher, routes chan string) {
 	}
 
 	crawl(url, depth, fetcher)
-	close(routes)
 }
 
 type fakeFetcher map[string]*fakeResult

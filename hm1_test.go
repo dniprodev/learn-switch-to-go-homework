@@ -10,6 +10,8 @@ import (
 	"sort"
 )
 
+// Using reflect.DeepEqual – встановлення та використання пакету https://pkg.go.dev/github.com/stretchr/testify/assert це є best practice
+
 type sqrtCase struct{ x, out float64 }
 type sqrtTest struct {
 	name  string
@@ -90,6 +92,9 @@ type crawlTest struct {
 	cases []crawlCase
 }
 
+// testCases variables краще обʼявляти не в global scope, а в local scope функції для тестов
+// https://golangr.com/scope
+// https://www.digitalocean.com/community/tutorials/understanding-package-visibility-in-go
 var crawlTests = []crawlTest{
 	{
 		name: "Start from https://golang.org/pkg/",
@@ -116,22 +121,30 @@ var crawlTests = []crawlTest{
 	},
 }
 
+// Для кожної функції треба новую функцію яка буде тестувати
+// https://go.dev/doc/tutorial/add-a-test
+// https://gobyexample.com/testing
 
 func TestCompute(t *testing.T) {
+	// Loops and Functions
 	for _, test := range sqrtTests {
 		t.Run(test.name, func(t *testing.T) { testSqrt(t, test) })
 	}
 
+	// Slices
 	for _, test := range picTests {
 		t.Run(test.name, func(t *testing.T) { testPic(t, test) })
 	}
 
+	// Maps
 	for _, test := range wordCountTests {
 		t.Run(test.name, func(t *testing.T) { testWordCount(t, test) })
 	}
 
+	// rot13Reader
 	testROT13()
 
+	// Web Crawler
 	for _, test := range crawlTests {
 		t.Run(test.name, func(t *testing.T) { testCrawlRunCases(t, test) })
 	}
@@ -148,16 +161,17 @@ func testSqrt(t *testing.T, test sqrtTest) {
 	}
 }
 
-func totalLen(slice [][]uint8) int {
-	var result int
-	for _, dy := range slice {
-		result += len(dy)
-	}
-	return result
-}
-
 func testPic(t *testing.T, test picTest) {
 	for _, c := range test.cases {
+
+		// допоміжну функцію totalLen я б створив як anonymous function в local scope якщо вона використовується тільки в одній
+		var totalLen = func (slice [][]uint8) int {
+			var result int
+			for _, dy := range slice {
+				result += len(dy)
+			}
+			return result
+		}
 
 		actual := Pic(c.dx, c.dy)
 		actualTotalLen := totalLen(actual)
