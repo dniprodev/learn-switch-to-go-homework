@@ -1,14 +1,18 @@
-# Go Hasher
+# switch-to-go-homework module which is lets-go-chat indeed 😅
+
+lets-go-chat is a small Go module with multiple packages.
+
+## Go Hasher
 
 A simple library to handle password hashing and checking.
 
-## Installation
+### Installation
 
 ```bash
 go get github.com/dniprodev/learn-switch-to-go-homework
 ```
 
-## Usage
+### Usage
 
 In your Go code, import the `hasher` package:
 
