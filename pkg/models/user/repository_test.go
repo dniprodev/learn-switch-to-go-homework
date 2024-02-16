@@ -1,12 +1,14 @@
 package user
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestRepository(t *testing.T) {
-	// want := User{id: "id", name: "name", password: "password"}
-	// var sut = Repository{}
-	// sut.save(User{id: "id", name: "name", password: "password"})
-	// if got, ok := sut.findByUsername("name"); got.id != want.id || !ok {
-	//     t.Errorf("findAll() = %v, want %v", got, want)
-	// }
+	want := User{ID: "id", Name: "name", Password: "password"}
+	var sut = Repository{}
+	sut.Save(User{ID: "id", Name: "name", Password: "password"})
+	if got, ok := sut.FindByUsername("name"); got.Name != want.Name || got.Password != want.Password || !ok {
+		t.Errorf("findAll() = %v, want %v", got, want)
+	}
 }
