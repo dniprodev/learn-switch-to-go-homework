@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/dniprodev/learn-switch-to-go-homework/pkg/models/user"
+	"github.com/dniprodev/learn-switch-to-go-homework/internal/models/user"
 )
 
 type createUserRequest struct {
@@ -35,7 +35,7 @@ func (request createUserRequest) validate() error {
 	return nil
 }
 
-func CreateUserHandler(repo UserRepositoryInterface) func(w http.ResponseWriter, r *http.Request) {
+func CreateUserHandler(saveUser func(user.User)) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var request createUserRequest
 		err := json.NewDecoder(r.Body).Decode(&request)
@@ -49,16 +49,13 @@ func CreateUserHandler(repo UserRepositoryInterface) func(w http.ResponseWriter,
 			return
 		}
 
-		newUser := user.User{
-			Name:     request.UserName,
-			Password: request.Password,
-		}
+		user := user.NewUser(request.UserName, request.Password)
 
-		newUser = repo.Save(newUser)
+		saveUser(user)
 
 		response := CreateUserResponse{
-			ID:       newUser.ID,
-			UserName: newUser.Name,
+			ID:       user.ID,
+			UserName: user.Name,
 		}
 
 		w.Header().Set(HeaderContentType, ContentTypeJSON)

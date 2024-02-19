@@ -7,12 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dniprodev/learn-switch-to-go-homework/pkg/models/user"
+	"github.com/dniprodev/learn-switch-to-go-homework/internal/models/user"
 )
 
-// TODO: Q - Naming
-// TODO: Q - reset storage before each test
-// TODO: Q - should check not only output but also storage
 func CreateUserHandlerTest(name, body string, wantStatus int, wantUserName string, t *testing.T) {
 	req, err := http.NewRequest("POST", "/users", strings.NewReader(body))
 	if err != nil {
@@ -21,10 +18,12 @@ func CreateUserHandlerTest(name, body string, wantStatus int, wantUserName strin
 
 	w := httptest.NewRecorder()
 
-	// TODO: Q - is this ok
-	var repository user.Repository
+	var userToBeCreated user.User
+	createUser := func(user user.User) {
+		userToBeCreated = user
+	}
 
-	CreateUserHandler(&repository)(w, req)
+	CreateUserHandler(createUser)(w, req)
 
 	resp := w.Result()
 
@@ -38,7 +37,7 @@ func CreateUserHandlerTest(name, body string, wantStatus int, wantUserName strin
 			t.Fatalf("Response body does not contain userName fields")
 		}
 
-		if _, ok := repository.FindByUsername(wantUserName); !ok {
+		if userToBeCreated.Name != wantUserName {
 			t.Fatalf("expected user created %v", wantUserName)
 		}
 	}

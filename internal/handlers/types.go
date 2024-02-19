@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/dniprodev/learn-switch-to-go-homework/pkg/models/user"
+	"github.com/dniprodev/learn-switch-to-go-homework/internal/models/user"
 )
 
 type UserRepositoryInterface interface {

@@ -8,8 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dniprodev/learn-switch-to-go-homework/pkg/models/user"
+	"github.com/dniprodev/learn-switch-to-go-homework/internal/models/user"
 )
+
+var correctUser = user.NewUser("myUser", "secretPass123")
 
 func loginUserHandlerTest(name, body string, wantStatus int, wantUser user.User, t *testing.T) {
 	req, err := http.NewRequest("POST", "/users/login", strings.NewReader(body))
@@ -19,11 +21,15 @@ func loginUserHandlerTest(name, body string, wantStatus int, wantUser user.User,
 
 	w := httptest.NewRecorder()
 
-	var repository user.Repository
+	findUser := func(name string) (user.User, error) {
+		if correctUser.Name == name {
+			return correctUser, nil
+		}
 
-	repository.Save(wantUser)
+		return user.User{}, nil
+	}
 
-	LoginUserHandler(&repository)(w, req)
+	LoginUserHandler(findUser)(w, req)
 
 	resp := w.Result()
 	if resp.StatusCode != wantStatus {
@@ -64,22 +70,22 @@ func TestLoginUserHandler(t *testing.T) {
 	}{
 		{
 			name:       "Valid Input",
-			body:       `{"userName": "myUser","password":"secretPass123"}`,
+			body:       `{"userName":"` + correctUser.Name + `","password":"` + correctUser.Password + `"}`,
 			wantStatus: http.StatusOK,
 			wantUser: user.User{
 				ID:       "1",
 				Name:     "myUser",
-				Password: "secretPass123",
+				Password: correctUser.Password,
 			},
 		},
 		{
 			name:       "Invalid UserName",
-			body:       `{"userName": "wrong","password":"secretPass123"}`,
+			body:       `{"userName": "wrong","password":"` + correctUser.Password + `"}`,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "Invalid Password",
-			body:       `{"userName": "myUser","password":"wrongPass"}`,
+			body:       `{"userName": "` + correctUser.Name + `","password":"wrongPass"}`,
 			wantStatus: http.StatusBadRequest,
 		},
 		// add more test cases as per your requirements

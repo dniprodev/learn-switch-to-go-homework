@@ -6,9 +6,10 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/dniprodev/learn-switch-to-go-homework/internal/models/user"
 )
 
-// TODO: Q - does it exist in Go library
 const (
 	HeaderContentType = "Content-Type"
 	ContentTypeJSON   = "application/json"
@@ -23,7 +24,7 @@ type LoginUserResponse struct {
 	URL string `json:"url"`
 }
 
-func LoginUserHandler(repo UserRepositoryInterface) func(w http.ResponseWriter, r *http.Request) {
+func LoginUserHandler(findByUsername func(string) (user.User, error)) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var request loginUserRequest
 		err := json.NewDecoder(r.Body).Decode(&request)
@@ -31,10 +32,9 @@ func LoginUserHandler(repo UserRepositoryInterface) func(w http.ResponseWriter, 
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
-		// TODO: Q - it is not required import )))
-		user, ok := repo.FindByUsername(request.UserName)
-		if !ok {
-			http.Error(w, "Invalid username/password", http.StatusBadRequest)
+		user, err := findByUsername(request.UserName)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		if user.Password != request.Password {
@@ -53,7 +53,6 @@ func LoginUserHandler(repo UserRepositoryInterface) func(w http.ResponseWriter, 
 		}
 
 		w.Header().Set(HeaderContentType, ContentTypeJSON)
-		// TODO: Q - Who control compliance? Server? how it is usually impemented?
 		w.Header().Set("X-Expires-After", time.Now().Add(2*time.Hour).Format(time.RFC3339))
 		w.Header().Set("X-Rate-Limit", "1000")
 		json.NewEncoder(w).Encode(response)
