@@ -23,7 +23,7 @@ func CreateUserHandlerTest(name, body string, wantStatus int, wantUserName strin
 		userToBeCreated = user
 	}
 
-	CreateUserHandler(createUser)(w, req)
+	CreateUserHandler(createUser).ServeHTTP(w, req)
 
 	resp := w.Result()
 
