@@ -1,0 +1,71 @@
+package user
+ 
+import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+ 
+func TestUserHandler(t *testing.T) {
+	testCases := []struct {
+		name       string
+		statusCode int
+		read       func(string) ([]byte, error)
+		marshal    func([]byte, any) error
+		method     string
+	}{
+		{
+			name:       "success",
+			statusCode: 200,
+			read: func(string) ([]byte, error) {
+				return nil, nil
+			},
+			marshal: func([]byte, any) error {
+				return nil
+			},
+			method: http.MethodPost,
+		},
+		{
+			name:       "failed method",
+			statusCode: http.StatusBadRequest,
+			read: func(string) ([]byte, error) {
+				return nil, nil
+			},
+			marshal: func([]byte, any) error {
+				return nil
+			},
+			method: http.MethodGet,
+		},
+		{
+			name:       "failed read",
+			statusCode: http.StatusInternalServerError,
+			read: func(string) ([]byte, error) {
+				return nil, fmt.Errorf("error")
+			},
+			marshal: func([]byte, any) error {
+				return nil
+			},
+			method: http.MethodPost,
+		},
+	}
+ 
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+ 
+			request := http.Request{Method: testCase.method}
+ 
+			h := Create(testCase.read, testCase.marshal)
+ 
+			h(recorder, request)
+ 
+			if recorder.Result().StatusCode != testCase.statusCode {
+				t.Fail()
+				return
+			}
+ 
+			recorder.Body
+		})
+	}
+}

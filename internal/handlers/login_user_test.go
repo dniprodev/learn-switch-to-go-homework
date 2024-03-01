@@ -29,7 +29,7 @@ func loginUserHandlerTest(name, body string, wantStatus int, wantUser user.User,
 		return user.User{}, nil
 	}
 
-	LoginUserHandler(findUser)(w, req)
+	LoginUserHandler(findUser).ServeHTTP(w, req)
 
 	resp := w.Result()
 	if resp.StatusCode != wantStatus {

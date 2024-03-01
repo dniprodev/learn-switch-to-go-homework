@@ -1,0 +1,26 @@
+ROM golang:1.22.0-alpine
+ 
+WORKDIR /build
+ 
+COPY . .
+ 
+RUN apk add git
+ 
+RUN version=`cat version` && BuildDate=`date +%FT%T` && BuildHash=`git rev-parse --verify HEAD` && go build -ldflags "-X main.BuildVersion=$version -X main.BuildDate=$BuildDate -X main.BuildHash=$BuildHash" .
+ 
+ 
+FROM alpine:3.19
+ 
+RUN apk update && apk upgrade && apk add --no-cache bash curl && rm -rf /var/cache/apk/*
+ 
+HEALTHCHECK CMD ["curl --fail http://localhost:8080/health || exit 1"]
+ 
+WORKDIR /snapshot
+ 
+ARG USER=appuser
+RUN addgroup -S "${USER}" -g 1001 && adduser -S "${USER}" -G "${USER}" -u 1001
+USER "${USER}"
+ 
+COPY --from=0 /build/go-mentoring-project .
+ 
+CMD ["./go-mentoring-project"]

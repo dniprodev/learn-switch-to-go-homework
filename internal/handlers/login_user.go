@@ -24,8 +24,8 @@ type LoginUserResponse struct {
 	URL string `json:"url"`
 }
 
-func LoginUserHandler(findByUsername func(string) (user.User, error)) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func LoginUserHandler(findByUsername func(string) (user.User, error)) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
 		var request loginUserRequest
 		err := json.NewDecoder(r.Body).Decode(&request)
 		if err != nil {
@@ -57,6 +57,7 @@ func LoginUserHandler(findByUsername func(string) (user.User, error)) func(w htt
 		w.Header().Set("X-Rate-Limit", "1000")
 		json.NewEncoder(w).Encode(response)
 	}
+	return http.HandlerFunc(fn)
 }
 
 func generateRandomToken() (string, error) {
