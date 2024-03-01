@@ -19,8 +19,9 @@ func CreateUserHandlerTest(name, body string, wantStatus int, wantUserName strin
 	w := httptest.NewRecorder()
 
 	var userToBeCreated user.User
-	createUser := func(user user.User) {
+	createUser := func(user user.User) error {
 		userToBeCreated = user
+		return nil
 	}
 
 	CreateUserHandler(createUser).ServeHTTP(w, req)
