@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -14,8 +16,10 @@ import (
 )
 
 func main() {
+	context := context.Background()
+
 	uri := os.Getenv("DATABASE_URL")
-	usersRepo, err := user.NewRepository(uri)
+	usersRepo, err := user.NewRepository(context, uri)
 	if err != nil {
 		log.Fatalf("Failed to create the users repository: %s", err)
 	}
@@ -40,14 +44,27 @@ func main() {
 	}
 	log.Println(messsages)
 
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+
 	chain := alice.New(
-		middlewares.RecoverHandler,
 		middlewares.HttpCallsLoggingHandler,
-		middlewares.HttpErrorLoggingHandler,
+		middlewares.CreateRecoverHandler(logger),
+		middlewares.CreateHttpErrorLoggingHandler(logger),
 	)
 
-	http.Handle("/user", chain.Then(handlers.CreateUserHandler(usersRepo.Save)))
-	http.Handle("/user/login", chain.Then(handlers.LoginUserHandler(usersRepo.FindByUsername)))
+	// TODOq:
+	save := func(user user.User) error {
+		return usersRepo.Save(context, user)
+	}
+
+	findByUsername := func(name string) (user.User, error) {
+		return usersRepo.FindByUsername(context, name)
+	}
+
+	http.Handle("/user", chain.Then(handlers.CreateUserHandler(save)))
+	http.Handle("/user/login", chain.Then(handlers.LoginUserHandler(findByUsername)))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	// TODOq: TestMain, TestSutie
 }

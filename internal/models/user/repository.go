@@ -14,8 +14,8 @@ type Repository struct {
 	conn *pgx.Conn
 }
 
-func NewRepository(postgresURI string) (*Repository, error) {
-	conn, err := pgx.Connect(context.Background(), postgresURI)
+func NewRepository(ctx context.Context, postgresURI string) (*Repository, error) {
+	conn, err := pgx.Connect(ctx, postgresURI)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
@@ -49,15 +49,15 @@ func (r *Repository) Initialize() error {
 	return err
 }
 
-func (r *Repository) Save(user User) error {
+func (r *Repository) Save(ctx context.Context, user User) error {
 	sqlStatement := `INSERT INTO users (id, name, password) VALUES ($1, $2, $3)`
-	_, err := r.conn.Exec(context.Background(), sqlStatement, user.ID, user.Name, user.Password)
+	_, err := r.conn.Exec(ctx, sqlStatement, user.ID, user.Name, user.Password)
 	return err
 }
 
-func (r *Repository) FindByUsername(name string) (User, error) {
+func (r *Repository) FindByUsername(ctx context.Context, name string) (User, error) {
 	sqlStatement := `SELECT id, name, password FROM users WHERE name=$1`
-	row := r.conn.QueryRow(context.Background(), sqlStatement, name)
+	row := r.conn.QueryRow(ctx, sqlStatement, name)
 
 	var user User
 	err := row.Scan(&user.ID, &user.Name, &user.Password)

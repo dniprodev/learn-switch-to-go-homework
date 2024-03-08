@@ -17,15 +17,17 @@ func (rw *responseWriter) WriteHeader(statusCode int) {
 	rw.ResponseWriter.WriteHeader(statusCode)
 }
 
-func HttpErrorLoggingHandler(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		respWriter := &responseWriter{ResponseWriter: w}
+func CreateHttpErrorLoggingHandler(logger *slog.Logger) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			respWriter := &responseWriter{ResponseWriter: w}
 
-		next.ServeHTTP(respWriter, r)
+			next.ServeHTTP(respWriter, r)
 
-		if respWriter.statusCode >= 400 {
-			slog.Error("HTTP error occurred", "errorCode", respWriter.statusCode, "url", r.URL)
+			if respWriter.statusCode >= 400 {
+				logger.Error("HTTP error occurred", "errorCode", respWriter.statusCode, "url", r.URL)
+			}
 		}
+		return http.HandlerFunc(fn)
 	}
-	return http.HandlerFunc(fn)
 }
