@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dniprodev/learn-switch-to-go-homework/internal/models/user"
+	"github.com/dniprodev/learn-switch-to-go-homework/chat/internal/models/user"
 )
 
 var correctUser = user.NewUser("myUser", "secretPass123")

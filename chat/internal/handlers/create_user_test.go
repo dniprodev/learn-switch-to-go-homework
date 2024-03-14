@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dniprodev/learn-switch-to-go-homework/internal/models/user"
+	"github.com/dniprodev/learn-switch-to-go-homework/chat/internal/models/user"
 )
 
 func CreateUserHandlerTest(name, body string, wantStatus int, wantUserName string, t *testing.T) {

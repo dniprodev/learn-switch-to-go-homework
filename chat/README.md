@@ -9,7 +9,7 @@ A simple library to handle password hashing and checking.
 ### Installation
 
 ```bash
-go get github.com/dniprodev/learn-switch-to-go-homework
+go get github.com/dniprodev/learn-switch-to-go-homework/chat
 ```
 
 ### Usage
@@ -17,7 +17,7 @@ go get github.com/dniprodev/learn-switch-to-go-homework
 In your Go code, import the `hasher` package:
 
 ```golang
-import "github.com/dniprodev/learn-switch-to-go-homework/hasher"
+import "github.com/dniprodev/learn-switch-to-go-homework/chat/hasher"
 ```
 
 You can then use the function `HashPassword` to hash a password:

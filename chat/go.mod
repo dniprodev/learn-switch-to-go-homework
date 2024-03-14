@@ -1,4 +1,4 @@
-module github.com/dniprodev/learn-switch-to-go-homework
+module github.com/dniprodev/learn-switch-to-go-homework/chat
 
 go 1.21
 

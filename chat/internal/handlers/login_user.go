@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dniprodev/learn-switch-to-go-homework/internal/models/user"
+	"github.com/dniprodev/learn-switch-to-go-homework/chat/internal/models/user"
 )
 
 const (
