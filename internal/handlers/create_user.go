@@ -35,7 +35,7 @@ func (request createUserRequest) validate() error {
 	return nil
 }
 
-func CreateUserHandler(saveUser func(user.User)) http.Handler {
+func CreateUserHandler(saveUser func(user.User) error) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var request createUserRequest
 		err := json.NewDecoder(r.Body).Decode(&request)
@@ -51,7 +51,11 @@ func CreateUserHandler(saveUser func(user.User)) http.Handler {
 
 		user := user.NewUser(request.UserName, request.Password)
 
-		saveUser(user)
+		err = saveUser(user)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		response := CreateUserResponse{
 			ID:       user.ID,

@@ -44,3 +44,30 @@ Please note:
 1. Replace `"myPassword"` and `hashedPassword` with the actual password and hashed password you want to work with respectively.
 2. You need to handle the error returned by `HashPassword` based on your program needs.
 3. The `CheckPasswordHash` function returns a boolean to indicate if the password and the hash match.
+
+Sure, here's a condensed version:
+
+**Local Deployment Guide:**
+
+1. Install [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/).
+
+1. Clone the repo: `git clone <URL of your repository>`
+
+1. Move to the project directory: `cd path/to/project`
+
+1. Update the `.env` file with the appropriate values for your PostgreSQL and MongoDB setup.
+
+1. Build and Start the app: 
+   
+   ```bash
+   docker-compose up --build
+   ```
+
+1. To validate that the application is running, navigate to `http://localhost:${HTTP_PORT}` in your browser (replace `${HTTP_PORT}` with your chosen port from `.env`).
+
+1. To shut down the app and delete its resources, run:
+
+   ```bash
+   docker-compose down
+   ```
+Make sure to replace all placeholders (like `<URL of your repository>` and `path/to/project`) with actual values.
