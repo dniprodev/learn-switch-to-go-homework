@@ -15,4 +15,13 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     ports:
       - "${MONGO_PORT}:${MONGO_PORT}"
-      
+  user-service:
+    build:
+      context: ../user_service
+    ports:
+      - "${GRPC_PORT}:${GRPC_PORT}"
+    environment:
+      GRPC_PORT: ${GRPC_PORT}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@users-db:${POSTGRES_PORT}/${POSTGRES_DB}
+    depends_on:
+      - users-db  

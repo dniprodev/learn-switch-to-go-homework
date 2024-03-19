@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"github.com/dniprodev/learn-switch-to-go-homework/chat/internal/models/user"
+	"github.com/dniprodev/learn-switch-to-go-homework/user_service/models/user"
 )
 
 func CreateUserHandlerTest(name, body string, wantStatus int, wantUserName string, t *testing.T) {
@@ -19,7 +20,7 @@ func CreateUserHandlerTest(name, body string, wantStatus int, wantUserName strin
 	w := httptest.NewRecorder()
 
 	var userToBeCreated user.User
-	createUser := func(user user.User) error {
+	createUser := func(_ context.Context, user user.User) error {
 		userToBeCreated = user
 		return nil
 	}

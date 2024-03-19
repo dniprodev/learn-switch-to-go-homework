@@ -3,4 +3,6 @@ go 1.21.6
 use (
 	./chat
 	./end-to-end
+	./user_service
+	./generated
 )

@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
 
-	"github.com/dniprodev/learn-switch-to-go-homework/chat/internal/models/user"
+	"github.com/dniprodev/learn-switch-to-go-homework/user_service/models/user"
 )
 
 type createUserRequest struct {
@@ -35,7 +36,7 @@ func (request createUserRequest) validate() error {
 	return nil
 }
 
-func CreateUserHandler(saveUser func(user.User) error) http.Handler {
+func CreateUserHandler(storeUser func(context.Context, user.User) error) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var request createUserRequest
 		err := json.NewDecoder(r.Body).Decode(&request)
@@ -51,7 +52,9 @@ func CreateUserHandler(saveUser func(user.User) error) http.Handler {
 
 		user := user.NewUser(request.UserName, request.Password)
 
-		err = saveUser(user)
+		context := context.Background()
+
+		err = storeUser(context, user)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

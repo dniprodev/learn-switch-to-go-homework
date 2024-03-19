@@ -9,41 +9,53 @@ import (
 	"os"
 
 	"github.com/justinas/alice"
+	"google.golang.org/grpc"
 
 	"github.com/dniprodev/learn-switch-to-go-homework/chat/internal/handlers"
 	"github.com/dniprodev/learn-switch-to-go-homework/chat/internal/middlewares"
-	"github.com/dniprodev/learn-switch-to-go-homework/chat/internal/models/user"
+	"github.com/dniprodev/learn-switch-to-go-homework/user_service/models/user"
+
+	pb "github.com/dniprodev/learn-switch-to-go-homework/generated"
 )
 
+func createGRPCClient(ctx context.Context, address string, opts ...grpc.DialOption) (pb.UserServiceClient, *grpc.ClientConn, error) {
+	conn, err := grpc.Dial(address, opts...)
+	if err != nil {
+		return nil, nil, fmt.Errorf("did not connect: %w", err)
+	}
+	return pb.NewUserServiceClient(conn), conn, nil
+}
+
+func storeUser(ctx context.Context, client pb.UserServiceClient, user user.User) (string, error) {
+	resp, err := client.StoreUser(ctx, &pb.StoreUserRequest{User: &pb.User{
+		UserId: user.ID,
+		Name:   user.Name,
+	}})
+	if err != nil {
+		return "", fmt.Errorf("failed to store user: %v", err)
+	}
+	return resp.Result, nil
+}
+
+func loginUser(ctx context.Context, client pb.UserServiceClient, username string, password string) (string, error) {
+	resp, err := client.LoginUser(ctx, &pb.LoginUserRequest{
+		UserName: username,
+		Password: password,
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to login user: %v", err)
+	}
+	return resp.Token, nil
+}
+
 func main() {
-	context := context.Background()
-
-	uri := os.Getenv("DATABASE_URL")
-	fmt.Println(uri)
-	usersRepo, err := user.NewRepository(context, uri)
+	userServiceAddress := os.Getenv("USER_SERVICE_ADDRESS")
+	ctx := context.Background()
+	userServiceClient, conn, err := createGRPCClient(ctx, userServiceAddress)
 	if err != nil {
-		log.Fatalf("Failed to create the users repository: %s", err)
+		log.Fatalf("Failed to create user service client: %v", err)
 	}
-
-	defer usersRepo.Close()
-
-	err = usersRepo.Initialize()
-	if err != nil {
-		log.Fatalf("Failed to initialize the database: %s", err)
-	}
-
-	// mongoURI := os.Getenv("MONGO_URI")
-	// messagesRepo, err := message.NewRepository(mongoURI)
-	// if err != nil {
-	// log.Fatalf("Failed to create the messages repository: %s", err)
-	// }
-
-	// messagesRepo.Save(message.Message{Id: "1", Text: "Hello, world!"})
-	// messsages, err := messagesRepo.FindAll()
-	// if err != nil {
-	// 	log.Println("Find all error")
-	// }
-	// log.Println(messsages)
+	defer conn.Close()
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
@@ -53,23 +65,19 @@ func main() {
 		middlewares.CreateHttpErrorLoggingHandler(logger),
 	)
 
-	// TODOq:
-	save := func(user user.User) error {
-		return usersRepo.Save(context, user)
+	storeUserWrapper := func(ctx context.Context, user user.User) error {
+		_, err := storeUser(ctx, userServiceClient, user)
+		return err
 	}
 
-	findByUsername := func(name string) (user.User, error) {
-		return usersRepo.FindByUsername(context, name)
+	loginUserWrapper := func(ctx context.Context, username string, password string) (string, error) {
+		return loginUser(ctx, userServiceClient, username, password)
 	}
 
-	http.Handle("/user", chain.Then(handlers.CreateUserHandler(save)))
-	http.Handle("/user/login", chain.Then(handlers.LoginUserHandler(findByUsername)))
+	http.Handle("/user", chain.Then(handlers.CreateUserHandler(storeUserWrapper)))
+	http.Handle("/user/login", chain.Then(handlers.LoginUserHandler(loginUserWrapper)))
 
 	httpPort := os.Getenv("HTTP_PORT")
-
-	fmt.Println("!!!!!!!!")
-	fmt.Println(uri)
-	fmt.Println(httpPort)
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", httpPort), nil))
 

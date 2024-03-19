@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -8,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dniprodev/learn-switch-to-go-homework/chat/internal/models/user"
+	"github.com/dniprodev/learn-switch-to-go-homework/user_service/models/user"
 )
 
 var correctUser = user.NewUser("myUser", "secretPass123")
@@ -21,12 +22,12 @@ func loginUserHandlerTest(name, body string, wantStatus int, wantUser user.User,
 
 	w := httptest.NewRecorder()
 
-	findUser := func(name string) (user.User, error) {
+	findUser := func(ctx context.Context, name, password string) (string, error) {
 		if correctUser.Name == name {
-			return correctUser, nil
+			return correctUser.Password, nil
 		}
 
-		return user.User{}, nil
+		return "", nil
 	}
 
 	LoginUserHandler(findUser).ServeHTTP(w, req)
