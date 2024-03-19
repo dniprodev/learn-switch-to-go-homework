@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = "github.com/dniprodev/learn-switch-to-go-homework/usermanagement";
+option go_package = "github.com/dniprodev/learn-switch-to-go-homework/Usermanagement";
 
-package usermanagement;
+package Usermanagement;
 
 service UserService {
   // Add the following RPC method for login

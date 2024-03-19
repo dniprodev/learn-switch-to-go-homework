@@ -4,7 +4,7 @@
 // - protoc             v4.25.3
 // source: usermanagement.proto
 
-package usermanagement
+package Usermanagement
 
 import (
 	context "context"
@@ -40,7 +40,7 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 
 func (c *userServiceClient) LoginUser(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginUserResponse, error) {
 	out := new(LoginUserResponse)
-	err := c.cc.Invoke(ctx, "/usermanagement.UserService/LoginUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Usermanagement.UserService/LoginUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (c *userServiceClient) LoginUser(ctx context.Context, in *LoginUserRequest,
 
 func (c *userServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
 	out := new(GetUserResponse)
-	err := c.cc.Invoke(ctx, "/usermanagement.UserService/GetUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Usermanagement.UserService/GetUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (c *userServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opt
 
 func (c *userServiceClient) StoreUser(ctx context.Context, in *StoreUserRequest, opts ...grpc.CallOption) (*StoreUserResponse, error) {
 	out := new(StoreUserResponse)
-	err := c.cc.Invoke(ctx, "/usermanagement.UserService/StoreUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/Usermanagement.UserService/StoreUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (c *userServiceClient) StoreUser(ctx context.Context, in *StoreUserRequest,
 }
 
 func (c *userServiceClient) UploadImage(ctx context.Context, opts ...grpc.CallOption) (UserService_UploadImageClient, error) {
-	stream, err := c.cc.NewStream(ctx, &UserService_ServiceDesc.Streams[0], "/usermanagement.UserService/UploadImage", opts...)
+	stream, err := c.cc.NewStream(ctx, &UserService_ServiceDesc.Streams[0], "/Usermanagement.UserService/UploadImage", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (x *userServiceUploadImageClient) CloseAndRecv() (*UploadImageResponse, err
 }
 
 func (c *userServiceClient) FetchImage(ctx context.Context, in *FetchImageRequest, opts ...grpc.CallOption) (UserService_FetchImageClient, error) {
-	stream, err := c.cc.NewStream(ctx, &UserService_ServiceDesc.Streams[1], "/usermanagement.UserService/FetchImage", opts...)
+	stream, err := c.cc.NewStream(ctx, &UserService_ServiceDesc.Streams[1], "/Usermanagement.UserService/FetchImage", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ func _UserService_LoginUser_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/usermanagement.UserService/LoginUser",
+		FullMethod: "/Usermanagement.UserService/LoginUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).LoginUser(ctx, req.(*LoginUserRequest))
@@ -204,7 +204,7 @@ func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/usermanagement.UserService/GetUser",
+		FullMethod: "/Usermanagement.UserService/GetUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).GetUser(ctx, req.(*GetUserRequest))
@@ -222,7 +222,7 @@ func _UserService_StoreUser_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/usermanagement.UserService/StoreUser",
+		FullMethod: "/Usermanagement.UserService/StoreUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).StoreUser(ctx, req.(*StoreUserRequest))
@@ -281,7 +281,7 @@ func (x *userServiceFetchImageServer) Send(m *ImageData) error {
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var UserService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "usermanagement.UserService",
+	ServiceName: "Usermanagement.UserService",
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
