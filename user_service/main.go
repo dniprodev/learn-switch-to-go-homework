@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"net"
@@ -12,6 +13,8 @@ import (
 	usermanagement "github.com/dniprodev/learn-switch-to-go-homework/generated"
 	"github.com/dniprodev/learn-switch-to-go-homework/user_service/models/user"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type server struct {
@@ -70,6 +73,36 @@ func (s *server) StoreUser(ctx context.Context, req *usermanagement.StoreUserReq
 		return &usermanagement.StoreUserResponse{Result: "Failed to store user"}, err
 	}
 	return &usermanagement.StoreUserResponse{Result: "User stored successfully!!!"}, nil
+}
+
+// Global variable to hold the image data.
+var imageData []byte
+
+func (s *server) UploadImage(stream usermanagement.UserService_UploadImageServer) error {
+	for {
+		// Receive a message from the stream.
+		req, err := stream.Recv()
+		if err == io.EOF {
+			// The client has finished sending data.
+			break
+		}
+		if err != nil {
+			return status.Errorf(codes.Unknown, "failed to receive data: %v", err)
+		}
+
+		// Append the received data to the global variable.
+		imageData = append(imageData, req.Data...)
+	}
+
+	// Send a response to the client.
+	res := &usermanagement.UploadImageResponse{
+		Result: "Image uploaded successfully",
+	}
+	if err := stream.SendAndClose(res); err != nil {
+		return status.Errorf(codes.Unknown, "failed to send response: %v", err)
+	}
+
+	return nil
 }
 
 func main() {

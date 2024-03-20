@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"log/slog"
 	"net/http"
@@ -51,6 +52,46 @@ func loginUser(ctx context.Context, client pb.UserServiceClient, username string
 	return resp.Token, nil
 }
 
+func uploadImage(ctx context.Context, client pb.UserServiceClient, image io.Reader) error {
+	// Create a new stream for uploading the image.
+	stream, err := client.UploadImage(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to create upload stream: %v", err)
+	}
+
+	// Create a buffer to hold the image chunks.
+	buf := make([]byte, 1024)
+
+	// Read the image data in chunks and send each chunk to the server.
+	for {
+		n, err := image.Read(buf)
+		if err != nil && err != io.EOF {
+			return fmt.Errorf("failed to read image data: %v", err)
+		}
+		if n == 0 {
+			break
+		}
+
+		// Create a new ImageData message with the chunk of image data.
+		req := &pb.ImageData{
+			Data: buf[:n],
+		}
+
+		// Send the ImageData message to the server.
+		if err := stream.Send(req); err != nil {
+			return fmt.Errorf("failed to send image data: %v", err)
+		}
+	}
+
+	// Close the stream and receive the response from the server.
+	_, err = stream.CloseAndRecv()
+	if err != nil {
+		return fmt.Errorf("failed to close stream: %v", err)
+	}
+
+	return nil
+}
+
 func main() {
 	userServiceAddress := os.Getenv("USER_SERVICE_ADDRESS")
 	mongoURI := os.Getenv("MONGO_URI")
@@ -80,8 +121,13 @@ func main() {
 		return loginUser(ctx, userServiceClient, username, password)
 	}
 
+	uploadImageWrapper := func(ctx context.Context, image io.Reader) error {
+		return uploadImage(ctx, userServiceClient, image)
+	}
+
 	http.Handle("/user", chain.Then(handlers.CreateUserHandler(storeUserWrapper)))
 	http.Handle("/user/login", chain.Then(handlers.LoginUserHandler(loginUserWrapper)))
+	http.Handle("/image", chain.Then(handlers.ImageUploadHandler(uploadImageWrapper)))
 
 	httpPort := os.Getenv("HTTP_PORT")
 
