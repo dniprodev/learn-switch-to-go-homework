@@ -5,21 +5,13 @@ services:
     ports:
       - "${HTTP_PORT}:${HTTP_PORT}"
     depends_on:
-      - users-db
       - messages-db
     environment:
       HTTP_PORT: ${HTTP_PORT}
       USER_SERVICE_ADDRESS: user-service:${GRPC_PORT}
       MONGO_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}
-  users-db:
-    container_name: users_db_e2e
-    image: "postgres"
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    networks:
+      - chat-network
   messages-db:
     container_name: messages_db_e2e
     image: "mongo"
@@ -28,13 +20,9 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     ports:
       - "${MONGO_PORT}:${MONGO_PORT}"
-  user-service:
-    build:
-      context: ../user_service
-    ports:
-      - "${GRPC_PORT}:${GRPC_PORT}"
-    environment:
-      GRPC_PORT: ${GRPC_PORT}
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@users-db:${POSTGRES_PORT}/${POSTGRES_DB}
-    depends_on:
-      - users-db        
+    networks:
+      - chat-network
+
+networks:
+  chat-network:
+    external: true

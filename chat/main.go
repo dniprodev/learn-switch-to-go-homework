@@ -10,6 +10,7 @@ import (
 
 	"github.com/justinas/alice"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/dniprodev/learn-switch-to-go-homework/chat/internal/handlers"
 	"github.com/dniprodev/learn-switch-to-go-homework/chat/internal/middlewares"
@@ -28,9 +29,11 @@ func createGRPCClient(ctx context.Context, address string, opts ...grpc.DialOpti
 
 func storeUser(ctx context.Context, client pb.UserServiceClient, user user.User) (string, error) {
 	resp, err := client.StoreUser(ctx, &pb.StoreUserRequest{User: &pb.User{
-		UserId: user.ID,
-		Name:   user.Name,
+		UserId:   user.ID,
+		Name:     user.Name,
+		Password: user.Password,
 	}})
+	log.Printf("Store user resp: %v", resp)
 	if err != nil {
 		return "", fmt.Errorf("failed to store user: %v", err)
 	}
@@ -50,8 +53,11 @@ func loginUser(ctx context.Context, client pb.UserServiceClient, username string
 
 func main() {
 	userServiceAddress := os.Getenv("USER_SERVICE_ADDRESS")
+	mongoURI := os.Getenv("MONGO_URI")
 	ctx := context.Background()
-	userServiceClient, conn, err := createGRPCClient(ctx, userServiceAddress)
+	fmt.Println("USER_SERVICE_ADDRESS: ", userServiceAddress)
+	fmt.Println("MONGO_URI: ", mongoURI)
+	userServiceClient, conn, err := createGRPCClient(ctx, userServiceAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Failed to create user service client: %v", err)
 	}
