@@ -79,6 +79,7 @@ func (s *server) StoreUser(ctx context.Context, req *usermanagement.StoreUserReq
 var imageData []byte
 
 func (s *server) UploadImage(stream usermanagement.UserService_UploadImageServer) error {
+	log.Printf("Received upload image request")
 	for {
 		// Receive a message from the stream.
 		req, err := stream.Recv()
