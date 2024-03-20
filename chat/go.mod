@@ -3,13 +3,13 @@ module github.com/dniprodev/learn-switch-to-go-homework/chat
 go 1.21.6
 
 require (
+	github.com/dniprodev/learn-switch-to-go-homework/generated v0.0.0-20240319183824-d7791eef18b2
+	github.com/dniprodev/learn-switch-to-go-homework/user_service v0.0.0-20240319183824-d7791eef18b2
 	github.com/justinas/alice v1.2.0
 	google.golang.org/grpc v1.62.1
 )
 
 require (
-	github.com/dniprodev/learn-switch-to-go-homework/generated v0.0.0-20240319183824-d7791eef18b2 // indirect
-	github.com/dniprodev/learn-switch-to-go-homework/user_service v0.0.0-20240319183824-d7791eef18b2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
