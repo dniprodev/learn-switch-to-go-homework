@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+option go_package = "github.com/dniprodev/learn-switch-to-go-homework/Usermanagement";
+
+package Usermanagement;
+
+service UserService {
+  // Add the following RPC method for login
+  rpc LoginUser (LoginUserRequest) returns (LoginUserResponse);
+  rpc GetUser (GetUserRequest) returns (GetUserResponse);
+  rpc StoreUser (StoreUserRequest) returns (StoreUserResponse);
+  rpc UploadImage (stream ImageData) returns (UploadImageResponse);
+  rpc FetchImage (FetchImageRequest) returns (stream ImageData);
+  
+}
+
+message LoginUserRequest {
+  string user_name = 1;
+  string password = 2;
+}
+
+message LoginUserResponse {
+  string token = 1;
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message User {
+  string user_id = 1;
+  string name = 2;
+  string password = 3;
+}
+
+message StoreUserRequest {
+  User user = 1;
+}
+
+message StoreUserResponse {
+  string result = 1;
+}
+
+message UploadImageResponse {
+  string result = 1;
+}
+
+message ImageData {
+  bytes data = 1;
+}
+
+message FetchImageRequest {
+  string image_id = 1;
+}

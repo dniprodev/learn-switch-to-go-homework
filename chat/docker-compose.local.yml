@@ -1,0 +1,15 @@
+version: "3"
+services:
+  messages-db:
+    image: "mongo"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    ports:
+      - "${MONGO_PORT}:${MONGO_PORT}"
+    networks:
+      - chat-network
+
+networks:
+  chat-network:
+    name: chat-network
