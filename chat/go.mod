@@ -4,7 +4,7 @@ go 1.21.6
 
 require (
 	github.com/dniprodev/learn-switch-to-go-homework/generated v0.0.0-20240319183824-d7791eef18b2
-	github.com/dniprodev/learn-switch-to-go-homework/user_service v0.0.0-20240319183824-d7791eef18b2
+	github.com/dniprodev/learn-switch-to-go-homework/user_service v0.0.0-20240320122657-646adba4172b
 	github.com/justinas/alice v1.2.0
 	google.golang.org/grpc v1.62.1
 )

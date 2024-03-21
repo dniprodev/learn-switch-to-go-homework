@@ -92,6 +92,45 @@ func uploadImage(ctx context.Context, client pb.UserServiceClient, image io.Read
 	return nil
 }
 
+func fetchImage(ctx context.Context, client pb.UserServiceClient, imageID string) (io.Reader, error) {
+	// Create a new FetchImageRequest
+	req := &pb.FetchImageRequest{
+		ImageId: imageID,
+	}
+
+	// Call the FetchImage method on the client
+	stream, err := client.FetchImage(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a pipe to read the image data
+	pr, pw := io.Pipe()
+
+	// Start a new goroutine to read the image data from the stream and write it to the pipe
+	go func() {
+		defer pw.Close()
+
+		for {
+			data, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Printf("Failed to receive image data: %v", err)
+				return
+			}
+
+			if _, err := pw.Write(data.Data); err != nil {
+				log.Printf("Failed to write image data: %v", err)
+				return
+			}
+		}
+	}()
+
+	return pr, nil
+}
+
 func main() {
 	userServiceAddress := os.Getenv("USER_SERVICE_ADDRESS")
 	mongoURI := os.Getenv("MONGO_URI")
@@ -125,19 +164,34 @@ func main() {
 		return uploadImage(ctx, userServiceClient, image)
 	}
 
+	fetchImageWrapper := func(ctx context.Context) (io.Reader, error) {
+		return fetchImage(ctx, userServiceClient, "imageID")
+	}
+
+	imageHandler := func() http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			switch r.Method {
+			case http.MethodGet:
+				handlers.FetchImageHandler(fetchImageWrapper).ServeHTTP(w, r)
+			case http.MethodPost:
+				handlers.ImageUploadHandler(uploadImageWrapper).ServeHTTP(w, r)
+			default:
+				http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+			}
+		})
+	}
+
 	http.Handle("/user", chain.Then(handlers.CreateUserHandler(storeUserWrapper)))
 	http.Handle("/user/login", chain.Then(handlers.LoginUserHandler(loginUserWrapper)))
-	http.Handle("/image", chain.Then(handlers.ImageUploadHandler(uploadImageWrapper)))
+	http.Handle("/image", chain.Then(imageHandler()))
 
 	httpPort := os.Getenv("HTTP_PORT")
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", httpPort), nil))
-
-	// TODOq: testcontainers, ryuk is dsiabled
-	// https://medium.com/twodigits/testcontainers-on-podman-a090c348b9d8
-	// https://github.com/testcontainers/testcontainers-java/issues/2088
-	// https://github.com/containers/podman/blob/main/docs/tutorials/socket_activation.md
-	// TODOq: TestMain, TestSutie
-	// TODOq: converting existed structure into workspace
-	// TODOq: ene-to-end
 }
+
+// TODOq: Better place for gRPC client functions
+// TODOq: testcontainers, ryuk is dsiabled
+// https://medium.com/twodigits/testcontainers-on-podman-a090c348b9d8
+// https://github.com/testcontainers/testcontainers-java/issues/2088
+// https://github.com/containers/podman/blob/main/docs/tutorials/socket_activation.md

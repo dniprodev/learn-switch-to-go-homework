@@ -106,6 +106,30 @@ func (s *server) UploadImage(stream usermanagement.UserService_UploadImageServer
 	return nil
 }
 
+func (s *server) FetchImage(req *usermanagement.FetchImageRequest, stream usermanagement.UserService_FetchImageServer) error {
+	log.Printf("Received fetch image request")
+
+	chunkSize := 1024 // Size of each chunk in bytes
+	for i := 0; i < len(imageData); i += chunkSize {
+		end := i + chunkSize
+		if end > len(imageData) {
+			end = len(imageData)
+		}
+
+		// Create ImageData from the chunk.
+		data := &usermanagement.ImageData{
+			Data: imageData[i:end],
+		}
+
+		// Send the chunk to the client.
+		if err := stream.Send(data); err != nil {
+			return status.Errorf(codes.Unknown, "failed to send data: %v", err)
+		}
+	}
+
+	return nil
+}
+
 func main() {
 	portStr := os.Getenv("GRPC_PORT")
 	if portStr == "" {
