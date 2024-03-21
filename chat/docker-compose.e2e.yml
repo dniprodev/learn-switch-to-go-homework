@@ -1,0 +1,28 @@
+version: "3"
+services:
+  app:
+    build: .
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"
+    depends_on:
+      - messages-db
+    environment:
+      HTTP_PORT: ${HTTP_PORT}
+      USER_SERVICE_ADDRESS: user-service:${GRPC_PORT}
+      MONGO_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}
+    networks:
+      - chat-network
+  messages-db:
+    container_name: messages_db_e2e
+    image: "mongo"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    ports:
+      - "${MONGO_PORT}:${MONGO_PORT}"
+    networks:
+      - chat-network
+
+networks:
+  chat-network:
+    external: true
